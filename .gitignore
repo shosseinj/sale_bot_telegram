@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+node_modules/*
+*/node_modules/*
+worker/node_modules/
+
+# Environment files
+.dev.vars
+.env
+.env.*
+.env.local
+.env.production
+
+# Cloudflare/Wrangler
+wrangler.toml
+.wrangler/
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+build/
+*.log

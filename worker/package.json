@@ -1,0 +1,17 @@
+{
+  "name": "ai-sales-assistant-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local",
+    "deploy": "wrangler deploy",
+    "d1:local": "wrangler d1 migrations apply ai_sales_assistant --local",
+    "d1:remote": "wrangler d1 migrations apply ai_sales_assistant --remote",
+    "check": "node --check src/index.js && node --check ../panel/assets/app.js && node --check src/panel-assets.js",
+    "build:panel": "cd .. && node tools/build-panel-assets.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "latest"
+  }
+}

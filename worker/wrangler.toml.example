@@ -1,0 +1,19 @@
+name = "ai-sales-assistant-worker"
+main = "src/index.js"
+compatibility_date = "2026-06-30"
+workers_dev = true
+
+[vars]
+BOT_NAME = "دستیار فروش هوشمند فارسی"
+AI_MODEL = "@cf/meta/llama-3.1-8b-instruct"
+
+# بعد از ساخت D1 با دستور wrangler d1 create، database_id را فقط در wrangler.toml محلی خودتان بگذارید.
+[[d1_databases]]
+binding = "DB"
+database_name = "ai_sales_assistant"
+database_id = "PASTE_D1_DATABASE_ID_HERE"
+
+# اختیاری: اگر حساب شما Workers AI ندارد، این بخش را از wrangler.toml محلی حذف کنید.
+# برنامه بدون این binding هم با FAQ و محصولات پاسخ می‌دهد.
+[ai]
+binding = "AI"

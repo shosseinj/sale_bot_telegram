@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>پنل دستیار فروش هوشمند فارسی</title>
+  <meta name="description" content="پنل مدیریت فارسی برای ربات فروش و پشتیبانی هوشمند روی Cloudflare Workers" />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">AI</span>
+        <div>
+          <strong>دستیار فروش</strong>
+          <small>Cloudflare MVP</small>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="بخش‌های پنل">
+        <a href="#dashboard" class="active">داشبورد</a>
+        <a href="#products">محصولات</a>
+        <a href="#faq">دانش‌نامه</a>
+        <a href="#customers">مشتریان</a>
+        <a href="#messages">پیام‌ها</a>
+        <a href="#orders">سفارش‌ها</a>
+        <a href="#leads">درخواست‌ها</a>
+        <a href="#ai-test">تست پاسخ</a>
+        <a href="#settings">تنظیمات</a>
+        <a href="#guide">راهنمای اتصال</a>
+      </nav>
+
+      <div class="connection-card">
+        <span>وضعیت اتصال</span>
+        <strong id="connectionStatus">تنظیم نشده</strong>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">ربات فروش و پشتیبانی هوشمند فارسی</p>
+          <h1>پنل مدیریت فروش بدون سرور</h1>
+          <p>محصولات، پرسش‌های پرتکرار، پیام‌های تلگرام و درخواست‌های خرید را از همین پنل مدیریت کنید.</p>
+        </div>
+        <div class="top-actions">
+          <button id="seedDemoBtn" class="btn primary" type="button">ساخت داده دمو</button>
+          <button id="refreshBtn" class="btn" type="button">بروزرسانی</button>
+        </div>
+      </header>
+
+      <section id="dashboard" class="stats-grid" aria-label="آمار کلی">
+        <article class="stat-card tone-green"><span>مشتریان</span><strong id="statCustomers">-</strong></article>
+        <article class="stat-card tone-blue"><span>محصولات</span><strong id="statProducts">-</strong></article>
+        <article class="stat-card tone-amber"><span>درخواست‌ها</span><strong id="statLeads">-</strong></article>
+        <article class="stat-card tone-rose"><span>پیام‌ها</span><strong id="statMessages">-</strong></article>
+        <article class="stat-card tone-violet"><span>FAQ</span><strong id="statFaqs">-</strong></article>
+        <article class="stat-card tone-cyan"><span>سفارش‌ها</span><strong id="statOrders">-</strong></article>
+        <article class="stat-card tone-green"><span>فروش تاییدشده</span><strong id="statRevenue">-</strong></article>
+        <article class="stat-card tone-amber"><span>منتظر پرداخت</span><strong id="statAwaitingPayment">-</strong></article>
+      </section>
+
+      <section class="panel-section" id="connect">
+        <div class="section-head">
+          <div>
+            <h2>اتصال به Worker</h2>
+            <p>آدرس API و توکن مدیریت فقط در مرورگر شما ذخیره می‌شود.</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <label>آدرس Worker API
+            <input id="apiBase" dir="ltr" inputmode="url" placeholder="https://ai-sales-assistant-worker.hossein97jafari.workers.dev" />
+          </label>
+          <label>توکن مدیریت
+            <input id="adminToken" dir="ltr" type="password" autocomplete="off" placeholder="ADMIN_TOKEN" />
+          </label>
+          <button id="saveConnectionBtn" class="btn primary full" type="button">ذخیره و تست اتصال</button>
+          <button id="setWebhookBtn" class="btn secondary" type="button">تنظیم وبهوک تلگرام</button>
+          <button id="webhookInfoBtn" class="btn" type="button">بررسی وضعیت وبهوک</button>
+          <pre id="webhookResult" class="result-box full">وضعیت وبهوک اینجا نمایش داده می‌شود.</pre>
+        </div>
+      </section>
+
+      <section class="panel-section" id="products">
+        <div class="section-head">
+          <div>
+            <h2>محصولات</h2>
+            <p>ورود دستی، خروجی CSV و ورود گروهی از فایل خروجی اکسل.</p>
+          </div>
+          <div class="action-row">
+            <button id="downloadTemplateBtn" class="btn" type="button">قالب CSV</button>
+            <button id="exportProductsBtn" class="btn" type="button">خروجی CSV</button>
+          </div>
+        </div>
+
+        <div class="two-column">
+          <form id="productForm" class="form-stack">
+            <input name="name" placeholder="نام محصول" required />
+            <input name="sku" dir="ltr" placeholder="SKU یا کد کالا" />
+            <input name="category" placeholder="دسته‌بندی" />
+            <input name="price" inputmode="numeric" placeholder="قیمت تومان" />
+            <input name="stock" inputmode="numeric" placeholder="موجودی" />
+            <textarea name="description" placeholder="توضیحات کوتاه محصول"></textarea>
+            <button class="btn primary" type="submit">ثبت محصول</button>
+          </form>
+
+          <div class="upload-panel">
+            <strong>ورود گروهی از CSV</strong>
+            <p>ستون‌ها باید دقیقا این‌ها باشند: <code dir="ltr">sku,name,category,price,stock,description</code></p>
+            <label class="file-control">
+              <input id="csvFile" type="file" accept=".csv,text/csv" />
+              <span id="csvFileName">انتخاب فایل CSV</span>
+            </label>
+            <button id="importCsvBtn" class="btn secondary" type="button">ورود محصولات</button>
+            <pre id="importResult" class="result-box">نتیجه ورود اینجا نمایش داده می‌شود.</pre>
+          </div>
+        </div>
+
+        <div class="table-toolbar">
+          <input id="productSearch" placeholder="جستجو در محصولات" />
+          <button id="searchProductsBtn" class="btn" type="button">جستجو</button>
+        </div>
+        <div class="table-wrap"><table id="productsTable"></table></div>
+      </section>
+
+      <section class="panel-section" id="faq">
+        <div class="section-head">
+          <div>
+            <h2>دانش‌نامه و FAQ</h2>
+            <p>پاسخ‌های قابل اعتماد ربات از این بخش تغذیه می‌شود.</p>
+          </div>
+        </div>
+        <form id="faqForm" class="form-grid faq-form">
+          <input name="question" placeholder="سوال مشتری" required />
+          <input name="answer" placeholder="پاسخ کوتاه و دقیق" required />
+          <button class="btn primary" type="submit">ثبت FAQ</button>
+        </form>
+        <div class="table-wrap"><table id="faqTable"></table></div>
+      </section>
+
+      <section class="panel-section" id="customers">
+        <div class="section-head">
+          <div>
+            <h2>مشتریان</h2>
+            <p>کاربرانی که از تلگرام با ربات گفتگو کرده‌اند.</p>
+          </div>
+        </div>
+        <div class="table-wrap"><table id="customersTable"></table></div>
+      </section>
+
+      <section class="panel-section" id="messages">
+        <div class="section-head">
+          <div>
+            <h2>پیام‌ها</h2>
+            <p>آخرین پیام‌های ورودی و خروجی ربات.</p>
+          </div>
+        </div>
+        <div class="table-wrap"><table id="messagesTable"></table></div>
+      </section>
+
+      <section class="panel-section" id="orders">
+        <div class="section-head">
+          <div>
+            <h2>سفارش‌ها و پرداخت</h2>
+            <p>سفارش‌های ثبت‌شده از ربات، وضعیت پرداخت، فاکتور و پیگیری را مدیریت کنید.</p>
+          </div>
+          <div class="action-row">
+            <button id="exportOrdersBtn" class="btn" type="button">خروجی سفارش‌ها</button>
+          </div>
+        </div>
+        <form id="orderForm" class="form-grid order-form">
+          <input name="total_amount" inputmode="numeric" placeholder="مبلغ کل" />
+          <input name="customer_phone" dir="ltr" placeholder="شماره موبایل مشتری" />
+          <select name="status">
+            <option value="draft">پیش‌نویس</option>
+            <option value="awaiting_payment">در انتظار پرداخت</option>
+            <option value="payment_reported">پرداخت اعلام شده</option>
+            <option value="paid">پرداخت تایید شده</option>
+            <option value="confirmed">تایید شده</option>
+            <option value="sent">ارسال شده</option>
+            <option value="cancelled">لغو شده</option>
+          </select>
+          <select name="payment_status">
+            <option value="unpaid">پرداخت نشده</option>
+            <option value="reported">رسید ارسال شده</option>
+            <option value="verified">تایید پرداخت</option>
+          </select>
+          <input name="payment_reference" placeholder="شماره پیگیری پرداخت" />
+          <input name="notes" placeholder="یادداشت سفارش" />
+          <button class="btn primary" type="submit">ثبت سفارش</button>
+        </form>
+        <div class="table-wrap"><table id="ordersTable"></table></div>
+      </section>
+
+      <section class="panel-section" id="leads">
+        <div class="section-head">
+          <div>
+            <h2>درخواست‌ها و سرنخ‌ها</h2>
+            <p>پیام‌هایی که نیاز به پیگیری فروش یا پاسخ اپراتور دارند.</p>
+          </div>
+        </div>
+        <div class="table-wrap"><table id="leadsTable"></table></div>
+      </section>
+
+      <section class="panel-section" id="ai-test">
+        <div class="section-head">
+          <div>
+            <h2>تست پاسخ هوشمند</h2>
+            <p>پیش از اتصال تلگرام، پاسخ ربات را با داده‌های همین پنل بررسی کنید.</p>
+          </div>
+        </div>
+        <div class="ai-box">
+          <textarea id="aiQuestion" placeholder="مثلا: گوشی زیر ۲۰ میلیون چی دارید؟"></textarea>
+          <button id="testAiBtn" class="btn primary" type="button">تولید پاسخ</button>
+          <div id="aiAnswer" class="answer-box">پاسخ اینجا نمایش داده می‌شود.</div>
+        </div>
+      </section>
+
+      <section class="panel-section" id="settings">
+        <div class="section-head">
+          <div>
+            <h2>تنظیمات ربات</h2>
+            <p>متن‌های اصلی و نام فروشگاه را برای کسب‌وکار خود تنظیم کنید.</p>
+          </div>
+        </div>
+        <form id="settingsForm" class="form-stack">
+          <input name="shop_name" placeholder="نام فروشگاه" />
+          <input name="business_hours" placeholder="ساعت پاسخگویی" />
+          <input name="currency" placeholder="واحد پول، مثلا تومان" />
+          <input name="support_phone" dir="ltr" placeholder="شماره پشتیبانی" />
+          <input name="payment_card" dir="ltr" placeholder="شماره کارت برای پرداخت دستی" />
+          <input name="payment_iban" dir="ltr" placeholder="شماره شبا" />
+          <input name="payment_account_name" placeholder="نام صاحب حساب" />
+          <input name="payment_link" dir="ltr" placeholder="لینک پرداخت یا صفحه پرداخت" />
+          <input name="order_prefix" dir="ltr" placeholder="پیشوند کد سفارش، مثلا SB" />
+          <textarea name="delivery_info" placeholder="توضیح ارسال و تحویل"></textarea>
+          <textarea name="welcome_message" placeholder="پیام خوش‌آمد ربات"></textarea>
+          <textarea name="operator_message" placeholder="پیام ارجاع به اپراتور"></textarea>
+          <button class="btn primary" type="submit">ذخیره تنظیمات پرداخت و ربات</button>
+        </form>
+      </section>
+
+      <section class="panel-section guide" id="guide">
+        <div class="section-head">
+          <div>
+            <h2>راهنمای اتصال سریع</h2>
+            <p>راهنمای کامل در README فارسی پروژه قرار دارد.</p>
+          </div>
+        </div>
+        <ol>
+          <li>در پوشه <code>worker</code> دستور <code>npm install</code> را اجرا کنید.</li>
+          <li><code>wrangler.toml.example</code> و <code>.dev.vars.example</code> را کپی کنید و فقط روی سیستم خودتان مقدار بدهید.</li>
+          <li>با Wrangler دیتابیس D1 را بسازید و migration را اجرا کنید.</li>
+          <li>Secretهای Worker را با <code>wrangler secret put</code> تنظیم کنید.</li>
+          <li>Worker را deploy کنید، سپس آدرس آن و ADMIN_TOKEN را در همین پنل وارد کنید.</li>
+          <li>Webhook تلگرام را از دکمه «تنظیم وبهوک تلگرام» داخل همین پنل تنظیم کنید.</li>
+          <li>برای فروش خودکار، شماره کارت/شبا یا لینک پرداخت را در بخش تنظیمات وارد کنید.</li>
+          <li>مشتری در ربات با «خرید کد محصول» فاکتور می‌گیرد و بعد از پرداخت رسید را ارسال می‌کند.</li>
+        </ol>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="assets/app.js"></script>
+</body>
+</html>
